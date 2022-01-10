@@ -1,17 +1,16 @@
-
-import { Overworld } from './Overworld';
-import { OverworldMapConfig } from './OverworldMap';
-import './style.css'
+import { Overworld } from "./Overworld";
+import { OverworldMapConfig } from "./OverworldMap";
+import "./style.css";
 
 declare global {
   interface Window {
     OverworldMaps: {
-      [key: string]: OverworldMapConfig
-    }
+      [key: string]: OverworldMapConfig;
+    };
   }
 }
 
 const overworld = new Overworld({
-  element: document.querySelector(".game-container")!
-})
-overworld.init()
+  element: document.querySelector(".game-container")!,
+});
+overworld.init();

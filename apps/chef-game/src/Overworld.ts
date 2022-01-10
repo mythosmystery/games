@@ -3,64 +3,61 @@ import { GameObject } from './GameObject';
 import { OverworldMap } from './OverworldMap';
 
 export interface OverworldConfig {
-    element: HTMLElement
+   element: HTMLElement;
 }
 
 export class Overworld {
-    element: HTMLElement
-    canvas: HTMLCanvasElement
-    ctx: CanvasRenderingContext2D
-    map: OverworldMap
-    directionInput: DirectionInput
-    cameraPerson: GameObject
+   element: HTMLElement;
+   canvas: HTMLCanvasElement;
+   ctx: CanvasRenderingContext2D;
+   map: OverworldMap;
+   directionInput: DirectionInput;
+   cameraPerson: GameObject;
 
-    constructor(config: OverworldConfig) {
-        this.element = config.element;
-        this.canvas = this.element.querySelector(".game-canvas")!;
-        this.ctx = this.canvas.getContext("2d")!;
+   constructor(config: OverworldConfig) {
+      this.element = config.element;
+      this.canvas = this.element.querySelector('.game-canvas')!;
+      this.ctx = this.canvas.getContext('2d')!;
 
-        this.map = new OverworldMap(window.OverworldMaps.DemoRoom)
-        this.directionInput = new DirectionInput()
-        this.cameraPerson = this.map.gameObjects.hero;
-    }
+      this.map = new OverworldMap(window.OverworldMaps.DemoRoom);
+      this.directionInput = new DirectionInput();
+      this.cameraPerson = this.map.gameObjects.hero;
+   }
 
-    startGameLoop() {
-        const step = () => {
+   startGameLoop() {
+      const step = () => {
+         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+         this.cameraPerson = this.map.gameObjects.hero;
 
-            this.cameraPerson = this.map.gameObjects.hero;
+         Object.values(this.map.gameObjects).forEach(object => {
+            object.update({
+               arrow: this.directionInput.direction,
+               map: this.map
+            });
+         });
 
-            Object.values(this.map.gameObjects).forEach(object => {
-                object.update({
-                    arrow: this.directionInput.direction,
-                    map: this.map
-                })
-            })
+         this.map.drawLowerImage(this.ctx, this.cameraPerson);
 
-            this.map.drawLowerImage(this.ctx, this.cameraPerson)
+         Object.values(this.map.gameObjects).forEach(object => {
+            object.sprite.draw(this.ctx, this.cameraPerson);
+         });
 
-            Object.values(this.map.gameObjects).forEach(object => {
-                object.sprite.draw(this.ctx, this.cameraPerson)
-            })
+         this.map.drawUpperImage(this.ctx, this.cameraPerson);
 
-            this.map.drawUpperImage(this.ctx, this.cameraPerson)
+         requestAnimationFrame(() => {
+            step();
+         });
+      };
+      step();
+   }
 
-            requestAnimationFrame(() => {
-                step()
-            })
-        }
-        step()
-    }
+   init() {
+      this.map = new OverworldMap(window.OverworldMaps.DemoRoom);
+      this.map.mountObjects();
 
-    init() {
+      this.directionInput.init();
 
-        this.map = new OverworldMap(window.OverworldMaps.DemoRoom)
-        this.map.mountObjects()
-
-        this.directionInput.init()
-
-        this.startGameLoop()
-
-    }
+      this.startGameLoop();
+   }
 }
