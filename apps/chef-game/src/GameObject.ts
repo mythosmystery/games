@@ -71,6 +71,6 @@ export class GameObject {
       this.doBehaviorEvent(map);
    }
 
-   update(state: GOState) {}
+   update(state: Object) {}
    startBehavior(state: GOState, behavior: Behavior) {}
 }
