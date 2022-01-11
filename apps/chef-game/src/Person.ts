@@ -1,7 +1,7 @@
 import { GameObject, GOConfig, GOState } from './GameObject';
 import { OverworldMap } from './OverworldMap';
 import { AnimationFrameKey, Behavior, Direction, DirectionMap } from './types';
-import { GRID_SIZE } from './utils';
+import { emitEvent, GRID_SIZE } from './utils';
 
 export interface PersonState extends GOState {
    arrow: Direction | undefined;
@@ -33,7 +33,7 @@ export class Person extends GameObject {
       if (this.movingProgressRemaining > 0) {
          this.updatePosition();
       } else {
-         if (state.arrow && this.isPlayerControlled) {
+         if (state.arrow && this.isPlayerControlled && !state.map.isCutscenePlaying) {
             this.startBehavior(state, {
                type: 'walk',
                direction: state.arrow
@@ -47,10 +47,22 @@ export class Person extends GameObject {
       this.direction = behavior.direction;
       if (behavior.type === 'walk') {
          if (state.map.isSpaceTaken(this.x, this.y, this.direction)) {
+            behavior.retry &&
+               setTimeout(() => {
+                  this.startBehavior(state, behavior);
+               }, 10);
+
             return;
          }
          state.map.moveWall(this.x, this.y, this.direction);
          this.movingProgressRemaining = GRID_SIZE;
+         this.updateSprite();
+      }
+
+      if (behavior.type === 'stand') {
+         setTimeout(() => {
+            emitEvent('PersonStandComplete', { whoId: this.id });
+         }, behavior.time);
       }
    }
 
@@ -61,6 +73,9 @@ export class Person extends GameObject {
 
       if (this.movingProgressRemaining === 0) {
          //we finished the walk
+         emitEvent('PersonWalkingComplete', {
+            whoId: this.id
+         });
       }
    }
 

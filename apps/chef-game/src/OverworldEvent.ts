@@ -20,9 +20,29 @@ export class OverworldEvent {
       });
    }
 
-   stand(resolve: Function) {}
+   stand(resolve: Function) {
+      const who = this.map.gameObjects[this.event.who!];
+      who.startBehavior(
+         {
+            map: this.map
+         },
+         {
+            type: 'stand',
+            direction: this.event.direction,
+            time: this.event.time
+         }
+      );
 
-   walk(resolver: Function) {
+      const completeHandler = (e: any) => {
+         if (e.detail.whoId === this.event.who) {
+            document.removeEventListener('PersonStandComplete', completeHandler);
+            resolve();
+         }
+      };
+      document.addEventListener('PersonStandComplete', completeHandler);
+   }
+
+   walk(resolve: Function) {
       const who = this.map.gameObjects[this.event.who!];
       who.startBehavior(
          {
@@ -30,8 +50,18 @@ export class OverworldEvent {
          },
          {
             type: 'walk',
-            direction: this.event.direction
+            direction: this.event.direction,
+            retry: true
          }
       );
+
+      const completeHandler = (e: any) => {
+         if (e.detail.whoId === this.event.who) {
+            document.removeEventListener('PersonWalkingComplete', completeHandler);
+            resolve();
+         }
+      };
+
+      document.addEventListener('PersonWalkingComplete', completeHandler);
    }
 }

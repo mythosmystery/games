@@ -62,7 +62,7 @@ export class GameObject {
 
       await eventHandler.init();
 
-      this.behaviorLoopIndex++;
+      this.behaviorLoopIndex += 1;
 
       if (this.behaviorLoopIndex === this.behaviorLoop.length) {
          this.behaviorLoopIndex = 0;

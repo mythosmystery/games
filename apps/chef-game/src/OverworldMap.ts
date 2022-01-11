@@ -1,6 +1,7 @@
 import { GameObject } from './GameObject';
+import { OverworldEvent } from './OverworldEvent';
 import { Person } from './Person';
-import { Direction, WallsMap } from './types';
+import { Behavior, Direction, WallsMap } from './types';
 import { asGridCoord, nextPosition, withGrid } from './utils';
 
 export interface OverworldMapConfig {
@@ -56,6 +57,20 @@ export class OverworldMap {
       });
    }
 
+   async startCutscene(events: Behavior[]) {
+      this.isCutscenePlaying = true;
+
+      for (let event of events) {
+         const eventHandler = new OverworldEvent({
+            event,
+            map: this
+         });
+         await eventHandler.init();
+      }
+
+      this.isCutscenePlaying = false;
+   }
+
    addWall(x: number, y: number) {
       this.walls[`${x},${y}`] = true;
    }
@@ -86,11 +101,11 @@ window.OverworldMaps = {
             y: withGrid(6),
             src: '/images/characters/people/npc1.png',
             behaviorLoop: [
-               { type: 'walk', direction: 'left' },
-               { type: 'stand', direction: 'up', time: 800 },
                { type: 'walk', direction: 'up' },
+               { type: 'stand', direction: 'left', time: 800 },
                { type: 'walk', direction: 'right' },
-               { type: 'walk', direction: 'down' }
+               { type: 'walk', direction: 'down' },
+               { type: 'walk', direction: 'left' }
             ]
          })
       },

@@ -16,4 +16,5 @@ export interface Behavior {
    direction: Direction;
    time?: number;
    who?: string;
+   retry?: boolean;
 }
