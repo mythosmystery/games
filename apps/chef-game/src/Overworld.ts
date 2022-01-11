@@ -1,6 +1,8 @@
 import { DirectionInput } from './DirectionInput';
 import { GameObject } from './GameObject';
-import { OverworldMap } from './OverworldMap';
+import { ACTION_KEY } from './keybindings';
+import { OverworldMap, OverworldMapConfig } from './OverworldMap';
+import { KeyPressListener } from './utils';
 
 export interface OverworldConfig {
    element: HTMLElement;
@@ -54,21 +56,36 @@ export class Overworld {
       step();
    }
 
-   init() {
-      this.map = new OverworldMap(window.OverworldMaps.DemoRoom);
+   bindActionInput() {
+      new KeyPressListener(ACTION_KEY, () => {
+         this.map.checkForActionCutscene();
+      });
+   }
+
+   bindHeroPositionCheck() {
+      document.addEventListener('PersonWalkingComplete', (e: any) => {
+         if (e.detail.whoId === 'hero') {
+            this.map.checkForFootstepCutscene();
+         }
+      });
+   }
+
+   startMap(mapConfig: OverworldMapConfig) {
+      this.map = new OverworldMap(mapConfig);
+      this.map.overworld = this;
       this.map.mountObjects();
+   }
+
+   init() {
+      this.startMap(window.OverworldMaps.Kitchen);
+
+      this.bindActionInput();
+      this.bindHeroPositionCheck();
 
       this.directionInput.init();
 
       this.startGameLoop();
 
-      this.map.startCutscene([
-         { type: 'walk', direction: 'right', who: 'hero' },
-         { type: 'walk', direction: 'up', who: 'hero' },
-         { type: 'stand', direction: 'right', who: 'hero' },
-         { type: 'walk', direction: 'up', who: 'npcA' },
-         { type: 'walk', direction: 'left', who: 'npcA' },
-         { type: 'walk', direction: 'left', who: 'npcA' }
-      ]);
+      // this.map.startCutscene([{ type: 'changeMap', map: 'DemoRoom' }]);
    }
 }

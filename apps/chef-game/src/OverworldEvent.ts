@@ -1,5 +1,8 @@
 import { OverworldMap } from './OverworldMap';
+import { SceneTransition } from './SceneTransition';
+import { TextMessage } from './TextMessage';
 import { Behavior } from './types';
+import { opositeDirection } from './utils';
 
 export interface EventConfig {
    map: OverworldMap;
@@ -63,5 +66,28 @@ export class OverworldEvent {
       };
 
       document.addEventListener('PersonWalkingComplete', completeHandler);
+   }
+
+   textMessage(resolve: Function) {
+      if (this.event.faceHero) {
+         const obj = this.map.gameObjects[this.event.faceHero];
+         obj.direction = opositeDirection(this.map.gameObjects['hero'].direction);
+      }
+
+      const message = new TextMessage({
+         text: this.event.text!,
+         onComplete: () => resolve()
+      });
+      message.init(document.querySelector('.game-container')!);
+   }
+
+   changeMap(resolve: Function) {
+      const sceneTransition = new SceneTransition();
+      sceneTransition.init(document.querySelector('.game-container')!, () => {
+         this.map.overworld?.startMap(window.OverworldMaps[this.event.map!]);
+         resolve();
+
+         sceneTransition.fadeOut();
+      });
    }
 }

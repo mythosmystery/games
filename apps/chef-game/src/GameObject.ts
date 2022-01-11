@@ -2,7 +2,7 @@ import { OverworldEvent } from './OverworldEvent';
 import { OverworldMap } from './OverworldMap';
 import { PersonState } from './Person';
 import { Sprite } from './Sprite';
-import { Behavior, Direction } from './types';
+import { Behavior, Direction, EventQueue } from './types';
 
 export interface GOConfig {
    x: number;
@@ -10,6 +10,7 @@ export interface GOConfig {
    src?: string;
    direction?: Direction;
    behaviorLoop?: Array<Behavior>;
+   talking?: EventQueue;
 }
 
 export interface GOState {
@@ -29,6 +30,10 @@ export class GameObject {
    behaviorLoop: Array<Behavior>;
    behaviorLoopIndex: number;
 
+   isStanding: boolean = false;
+
+   talking: EventQueue;
+
    constructor(config: GOConfig) {
       this.x = config.x;
       this.y = config.y;
@@ -39,6 +44,8 @@ export class GameObject {
       });
       this.behaviorLoop = config.behaviorLoop || [];
       this.behaviorLoopIndex = 0;
+
+      this.talking = config.talking || [];
    }
 
    mount(map: OverworldMap) {
@@ -51,7 +58,7 @@ export class GameObject {
    }
 
    async doBehaviorEvent(map: OverworldMap) {
-      if (map.isCutscenePlaying || this.behaviorLoop.length === 0) {
+      if (map.isCutscenePlaying || this.behaviorLoop.length === 0 || this.isStanding) {
          return;
       }
 

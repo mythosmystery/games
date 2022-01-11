@@ -17,16 +17,6 @@ export const nextPosition = (initialX: number, initialY: number, direction: Dire
 
    const size = GRID_SIZE;
 
-   // switch (direction) {
-   //     case "left":
-   //         x -= size;
-   //     case "right":
-   //         x += size;
-   //     case "up":
-   //         y -= size;
-   //     case "down":
-   //         y += size;
-   // }
    if (direction === 'left') {
       x -= size;
    } else if (direction === 'right') {
@@ -39,7 +29,49 @@ export const nextPosition = (initialX: number, initialY: number, direction: Dire
    return { x, y };
 };
 
+export const opositeDirection = (direction: Direction): Direction => {
+   if (direction === 'left') {
+      return 'right';
+   }
+   if (direction === 'right') {
+      return 'left';
+   }
+   if (direction === 'up') {
+      return 'down';
+   }
+   return 'up';
+};
+
 export const emitEvent = (name: string, detail: Object) => {
    const event = new CustomEvent(name, { detail });
    document.dispatchEvent(event);
 };
+
+export class KeyPressListener {
+   keydownFunction: (event: KeyboardEvent) => void;
+   keyupFunction: (event: KeyboardEvent) => void;
+
+   constructor(keyCode: string, callback: Function) {
+      let keySafe = true;
+      this.keydownFunction = function (event) {
+         if (event.code === keyCode) {
+            if (keySafe) {
+               keySafe = false;
+               callback();
+            }
+         }
+      };
+      this.keyupFunction = function (event) {
+         if (event.code === keyCode) {
+            keySafe = true;
+         }
+      };
+      document.addEventListener('keydown', this.keydownFunction);
+      document.addEventListener('keyup', this.keyupFunction);
+   }
+
+   unbind() {
+      document.removeEventListener('keydown', this.keydownFunction);
+      document.removeEventListener('keyup', this.keyupFunction);
+   }
+}

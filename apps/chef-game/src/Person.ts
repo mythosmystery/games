@@ -44,7 +44,7 @@ export class Person extends GameObject {
    }
 
    startBehavior(state: PersonState, behavior: Behavior) {
-      this.direction = behavior.direction;
+      this.direction = behavior.direction!;
       if (behavior.type === 'walk') {
          if (state.map.isSpaceTaken(this.x, this.y, this.direction)) {
             behavior.retry &&
@@ -60,9 +60,11 @@ export class Person extends GameObject {
       }
 
       if (behavior.type === 'stand') {
+         this.isStanding = true;
          setTimeout(() => {
             emitEvent('PersonStandComplete', { whoId: this.id });
          }, behavior.time);
+         this.isStanding = false;
       }
    }
 
